@@ -1,0 +1,56 @@
+#!/bin/sh
+
+config='@SYSCONFDIR@/ipwm.conf'
+
+[ -f "$config" ] || {
+  echo "Config file $config not found" >&2
+  exit 1
+}
+
+register=
+period=
+
+register() {
+  register="$1"
+}
+
+period() {
+  period="`echo "0000$1" | tail -c 5`"
+}
+
+. "$config"
+{ echo "$register" | grep -q '^0x[0-9a-fA-F]\{1,8\}$' &&
+echo "$period" | grep -q '^[0-9a-fA-F]\{4\}$'; } || {
+  echo 'Invalid values' >&2
+  exit 1
+}
+
+value=`"@PKGLIBDIR@/igpureg" "$register"`
+oldperiod="`echo "$value" | tail -c +3 | head -c 4`"
+oldcycle="`echo "$value" | tail -c +7 | head -c 4`"
+
+case "$1" in
+  read)
+    echo "period=$oldperiod cycle=$oldcycle"
+    ;;
+  apply)
+    [ -z "$oldperiod" ] && {
+      echo 'Can not determine period' >&2
+      exit 1
+    }
+    [ -z "$oldcycle" ] && {
+      echo 'Can not determine cycle' >&2
+      exit 1
+    }
+    cycle="`awk "function min(x1, x2) { if (x1 < x2) return x1; return x2 }
+    BEGIN { printf(\\"%04x\\", min(0xffff, 0x$period / 0x$oldperiod * 0x$oldcycle)) }"`"
+    "@PKGLIBDIR@/igpureg" "$register" "0x$period$cycle" > /dev/null
+    ;;
+  *)
+    printf '%s\n' \
+    'Usage: ipwm COMMAND' \
+    '  read      Read and display current values' \
+    '  apply     Apply values from config file' \
+    >&2
+    ;;
+esac

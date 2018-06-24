@@ -1,0 +1,13 @@
+#!/bin/bash
+
+build() {
+  add_binary 'ipwm'
+  add_file '@PKGLIBDIR@/igpureg'
+  add_file '@SYSCONFDIR@/ipwm.conf'
+}
+
+help() {
+  cat <<HELPEOF
+This hook copies ipwm binaries and configuration to initramfs.
+HELPEOF
+}
