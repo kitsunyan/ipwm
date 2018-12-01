@@ -3,8 +3,8 @@ DESTDIR=
 
 BINDIR=/usr/local/bin
 LIBDIR=/usr/local/lib
-MODPROBEDIR=/etc/modprobe.d
 SYSCONFDIR=/etc
+MODPROBEDIR=
 MKINITCPIODIR=
 
 .PHONY: all clean install
@@ -21,7 +21,7 @@ all: \
 	igpureg \
 	ipwm \
 	modprobe.conf \
-	mkinitcpio.hook
+	mkinitcpio.install
 
 igpureg: igpureg.c
 	$(CC) $(CFLAGS) \
@@ -33,19 +33,20 @@ ipwm: ipwm.in
 modprobe.conf: modprobe.conf.in
 	$(call sedall,$<,$@)
 
-mkinitcpio.hook: mkinitcpio.hook.in
+mkinitcpio.install: mkinitcpio.install.in
 	$(call sedall,$<,$@)
 
 clean:
 	-rm -rf igpureg
 	-rm -rf ipwm
 	-rm -rf modprobe.conf
-	-rm -rf mkinitcpio.hook
+	-rm -rf mkinitcpio.install
 
 install: all
 	install -Dm755 'igpureg' "${DESTDIR}${LIBDIR}/ipwm/igpureg"
 	install -Dm755 'ipwm' "${DESTDIR}${BINDIR}/ipwm"
-	install -Dm644 'modprobe.conf' "${DESTDIR}${MODPROBEDIR}/ipwm.conf"
 	install -Dm644 'ipwm.conf' "${DESTDIR}${SYSCONFDIR}/ipwm.conf"
+	[ -z "${MODPROBEDIR}" ] || \
+	install -Dm644 'modprobe.conf' "${DESTDIR}${MODPROBEDIR}/ipwm.conf"
 	[ -z "${MKINITCPIODIR}" ] || \
-	install -Dm644 'mkinitcpio.hook' "${DESTDIR}${MKINITCPIODIR}/install/ipwm"
+	install -Dm644 'mkinitcpio.install' "${DESTDIR}${MKINITCPIODIR}/install/ipwm"
