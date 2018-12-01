@@ -4,6 +4,7 @@ build() {
   add_binary 'ipwm'
   add_file '@PKGLIBDIR@/igpureg'
   add_file '@SYSCONFDIR@/ipwm.conf'
+  add_runscript
 }
 
 help() {

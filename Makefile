@@ -50,3 +50,5 @@ install: all
 	install -Dm644 'modprobe.conf' "${DESTDIR}${MODPROBEDIR}/ipwm.conf"
 	[ -z "${MKINITCPIODIR}" ] || \
 	install -Dm644 'mkinitcpio.install' "${DESTDIR}${MKINITCPIODIR}/install/ipwm"
+	[ -z "${MKINITCPIODIR}" ] || \
+	install -Dm644 'mkinitcpio.hook' "${DESTDIR}${MKINITCPIODIR}/hooks/ipwm"
